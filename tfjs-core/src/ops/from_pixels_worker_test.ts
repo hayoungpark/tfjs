@@ -16,7 +16,7 @@
  */
 
 import '@tensorflow/tfjs-backend-cpu';
-import { expectArraysEqual } from "../test_util";
+import {expectArraysEqual} from '../test_util';
 
 describe('fromPixels worker', () => {
   it('fromPixels for ImageBitmap, worker', (done) => {
@@ -50,7 +50,8 @@ describe('fromPixels worker', () => {
       const bitmap = msg.data;
       const tensor = tf.browser.fromPixels(bitmap, 4);
       tensor.data().then((data) => {
-        const thinTensor = {shape: tensor.shape, dtype: tensor.dtype, data: data};
+        const thinTensor = {
+            shape: tensor.shape, dtype: tensor.dtype, data: data};
         self.postMessage(thinTensor);
       });
     };
@@ -68,12 +69,11 @@ describe('fromPixels worker', () => {
     };
 
     worker.onerror = (e) => {
-      if(typeof OffscreenCanvas === 'undefined' ||
-         typeof OffscreenCanvasRenderingContext2D === 'undefined') {
-        expect(e.message).toEqual(
+      if (typeof OffscreenCanvas === 'undefined' ||
+          typeof OffscreenCanvasRenderingContext2D === 'undefined') {
+        expect(e.message).toContain(
             'Cannot parse input in current context. ' +
-            'Reason: OffscreenCanvas Context2D rendering is not supported.'
-        );
+            'Reason: OffscreenCanvas Context2D rendering is not supported.');
       } else {
         throw e;
       }
