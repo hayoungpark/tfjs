@@ -156,7 +156,8 @@ async function benchmark(config, runOneBenchmark = getOneBenchmarkResult) {
   setupBenchmarkEnv(config);
   if (require.main === module) {
     console.log(
-        `Starting benchmarks using ${cliArgs?.webDeps ? 'cdn' : 'local'} ` +
+        `Starting benchmarks using ${
+            (cliArgs && cliArgs.webDeps) ? 'cdn' : 'local'} ` +
         `dependencies...`);
   }
 
@@ -165,14 +166,16 @@ async function benchmark(config, runOneBenchmark = getOneBenchmarkResult) {
   // Runs and gets result of each queued benchmark
   for (const tabId in config.browsers) {
     numActiveBenchmarks++;
-    results.push(runOneBenchmark(tabId, cliArgs?.maxTries).then((value) => {
-      value.deviceInfo = config.browsers[tabId];
-      value.modelInfo = config.benchmark;
-      return value;
-    }));
+    results.push(
+        runOneBenchmark(tabId, cliArgs && cliArgs.maxTries).then((value) => {
+          value.deviceInfo = config.browsers[tabId];
+          value.modelInfo = config.benchmark;
+          return value;
+        }));
 
     // Waits for specified # of benchmarks to complete before running more
-    if (cliArgs?.maxBenchmarks && numActiveBenchmarks >= cliArgs.maxBenchmarks) {
+    if (cliArgs && cliArgs.maxBenchmarks &&
+        numActiveBenchmarks >= cliArgs.maxBenchmarks) {
       numActiveBenchmarks = 0;
       await Promise.allSettled(results);
     }
@@ -181,12 +184,12 @@ async function benchmark(config, runOneBenchmark = getOneBenchmarkResult) {
   // Optionally written to an outfile or pushed to a database once all
   // benchmarks return results
   const fulfilled = await Promise.allSettled(results);
-  if (cliArgs?.outfile) {
+  if (cliArgs && cliArgs.outfile) {
     await write('./benchmark_results.json', fulfilled);
   } else {
     console.log('\Benchmarks complete.\n');
   }
-  if (cliArgs?.firestore) {
+  if (cliArgs && cliArgs.firestore) {
     await pushToFirestore(fulfilled);
   }
   return fulfilled;
